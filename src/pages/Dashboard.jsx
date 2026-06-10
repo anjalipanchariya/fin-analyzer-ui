@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
-import { FaUserCircle } from "react-icons/fa";
+import { FaTrash, FaUserCircle, FaEdit } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -33,11 +33,20 @@ const [monthlyTrend, setMonthlyTrend] = useState([]);
 const [categories, setCategories] = useState([]);
 const [transactions, setTransactions] = useState([]);
 const [showMenu, setShowMenu] = useState(false);
+const [showEditModal, setShowEditModal] = useState(false);
+const [selectedTransaction, setSelectedTransaction] = useState(null);
 const navigate = useNavigate();
+
 const handleLogout = () => {
   localStorage.removeItem("token");
   navigate("/");
 };
+
+const handleEdit = (transaction) => {
+  setSelectedTransaction(transaction);
+  setShowEditModal(true);
+};
+
 
 useEffect(() => {
 loadData();
@@ -72,12 +81,63 @@ await api.get("/dashboard");
 
 };
 
+const handleUpdate = async () => {
+  try {
+
+    console.log(selectedTransaction);
+    await api.put(
+      `/transactions/${selectedTransaction.transactionId}`,
+      selectedTransaction
+    );
+
+    setShowEditModal(false);
+
+    loadData();
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const handleDelete = async (transactionId) => {
+
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this transaction?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await api.delete(
+      `/transactions/${transactionId}`
+    );
+
+    loadData();
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const COLORS = [
 "#6C63FF",
 "#00C49F",
 "#FF8042",
 "#FFBB28",
 "#0088FE"
+];
+
+const CATEGORIES = [
+  "FOOD",
+  "PETROL",
+  "ENTERTAINMENT",
+  "SHOPPING",
+  "SALARY",
+  "OTHER",
+  "RECHARGE",
+  "UTILITIES",
+  "INVESTMENT",
+  "TRANSPORT"
 ];
 
 return ( <div className="dashboard">
@@ -197,6 +257,7 @@ return ( <div className="dashboard">
             <th>Description</th>
             <th>Category</th>
             <th>Amount</th>
+            <th>Action</th>
           </tr>
         </thead>
 
@@ -208,6 +269,25 @@ return ( <div className="dashboard">
               <td>{t.description}</td>
               <td>{t.category}</td>
               <td>₹ {t.amount}</td>
+              <td className="action-buttons">
+
+                <button
+                  className="edit-btn"
+                  onClick={() => handleEdit(t)}
+                >
+                  <FaEdit />
+                </button>
+
+                <button
+                  className="delete-btn"
+                  onClick={() =>
+                    handleDelete(t.transactionId)
+                  }
+                >
+                  <FaTrash />
+                </button>
+
+              </td>
             </tr>
           ))}
 
@@ -248,11 +328,94 @@ return ( <div className="dashboard">
           {dashboard.topExpenseCategory}
         </strong>
       </p>
+    </div>
+    {showEditModal && selectedTransaction && (
+      <div className="modal-overlay">
+
+        <div className="modal">
+
+          <h3>Edit Transaction</h3>
+
+          <input
+            type="text"
+            value={selectedTransaction.description}
+            onChange={(e) =>
+              setSelectedTransaction({
+                ...selectedTransaction,
+                description: e.target.value
+              })
+            }
+          />
+          <select
+            value={selectedTransaction.category}
+            onChange={(e) =>
+              setSelectedTransaction({
+                ...selectedTransaction,
+                category: e.target.value
+              })
+            }
+          >
+            {CATEGORIES.map((category) => (
+              <option
+                key={category}
+                value={category}
+              >
+                {category}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedTransaction.transactionType}
+            onChange={(e) =>
+              setSelectedTransaction({
+                ...selectedTransaction,
+                transactionType: e.target.value
+              })
+            }
+          >
+            <option value="INCOME">
+              INCOME
+            </option>
+
+            <option value="EXPENSE">
+              EXPENSE
+            </option>
+          </select>
+
+          <input
+            type="number"
+            value={selectedTransaction.amount}
+            onChange={(e) =>
+              setSelectedTransaction({
+                ...selectedTransaction,
+                amount: e.target.value
+              })
+            }
+          />
+
+        <div className="modal-actions">
+          <button
+            className="cancel-btn"
+            onClick={() => setShowEditModal(false)}
+          >
+            Cancel
+          </button>
+
+          <button
+            className="save-btn"
+            onClick={handleUpdate}
+          >
+            Save Changes
+          </button>
+</div>
+
 
     </div>
 
   </div>
-
+)}
+  </div>
 </div>
 
 );
