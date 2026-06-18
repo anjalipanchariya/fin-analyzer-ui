@@ -262,7 +262,6 @@ function Dashboard() {
                   try {
                     setLoadingAi(true);
                     setShowAiChat(true);
-                    console.log("Calling AI endpoint...");
                     const res = await api.get("/ai-insights");
                     setAiInsights(res.data.insights);
                   } catch (error) {
