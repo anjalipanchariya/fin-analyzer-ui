@@ -50,6 +50,7 @@ function Dashboard() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showAiChat, setShowAiChat] = useState(false);
   const [aiInsights, setAiInsights] = useState([]);
+  const [loadingAi, setLoadingAi] = useState(false);
 
   const navigate = useNavigate();
 
@@ -259,11 +260,15 @@ function Dashboard() {
       <button className="ai-chat-btn"
               onClick={async () => {
                   try {
+                    setLoadingAi(true);
+                    setShowAiChat(true);
+                    console.log("Calling AI endpoint...");
                     const res = await api.get("/ai-insights");
                     setAiInsights(res.data.insights);
-                    setShowAiChat(true);
                   } catch (error) {
                     console.error(error);
+                  } finally {
+                         setLoadingAi(false);
                   }
                 }}
       >
@@ -355,16 +360,23 @@ function Dashboard() {
 
               </div>
 
-              <div className="ai-body">
+               <div className="ai-body">
+                 {loadingAi ? (
+                   <div className="loader-container">
+                     <div className="loader"></div>
+                     <p>🤖 Analyzing your finances...</p>
+                   </div>
 
-                <div
-                  className="ai-message"
-                  style={{ whiteSpace: "pre-line" }}
-                >
-                  {aiInsights}
-                </div>
+                 ) : (
 
-              </div>
+                   <div
+                     className="ai-message"
+                     style={{ whiteSpace: "pre-line" }}
+                   >
+                     {aiInsights}
+                   </div>
+                 )}
+               </div>
 
             </div>
 
