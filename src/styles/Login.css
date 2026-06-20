@@ -58,3 +58,13 @@ body {
 .register-link {
   margin-top: 1rem;
 }
+
+.success {
+  color: #16a34a;
+  background-color: #dcfce7;
+  border: 1px solid #86efac;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}

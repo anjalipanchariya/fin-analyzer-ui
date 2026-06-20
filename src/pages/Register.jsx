@@ -23,12 +23,11 @@ function Register() {
         password,
       });
 
-      setSuccess("Registration successful! Please login.");
-      setError("");
-
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      navigate("/", {
+            state: {
+              message: "✅ Registration successful! Please login.",
+            },
+        });
 
     } catch (err) {
       console.error(err);

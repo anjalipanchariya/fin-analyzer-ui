@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import api from "../services/api.js";
 import "../styles/Login.css";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
 
+  const successMessage = location.state?.message;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -52,6 +54,9 @@ function Login() {
           />
 
           {error && <p className="error">{error}</p>}
+          {successMessage && (
+            <p className="success">{successMessage}</p>
+          )}
 
           <button type="submit">
             Login
